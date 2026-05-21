@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. GLOBAL CSS (TEKS PUTIH MENYALA)
+# 1. GLOBAL CSS (TEKS OTOMATIS KONTRAS / ADAPTIF)
 # ==========================================
 st.markdown("""
     <style>
@@ -19,12 +19,17 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
+    /* HAPUS background-color gelap jika Anda ingin bereksperimen dengan background putih */
     .stApp {
-        background-color: #0A0C10;
+        background-color: #0A0C10; 
     }
     
+    /* ----------------------------------------------------
+       FITUR TERBARU: WARNA TEKS OTOMATIS BERADAPTASI
+       ---------------------------------------------------- */
     * {
         color: #FFFFFF !important;
+        mix-blend-mode: difference; /* Otomatis hitam di bg putih, putih di bg hitam */
     }
     
     .stTextArea textarea, .stTextInput input {
@@ -148,25 +153,32 @@ with col1:
 
 with col2:
     st.markdown("### 🤖 Ringkasan & Notulensi (Ollama Qwen 2.5)")
+    
+    # PROMPT KHUSUS DJP SEBAGAI DEFAULT
     default_prompt = (
-        "saya bekerja di Direktorat Jenderal Pajak (DJP). Bertindaklah sebagai 3 role Sekretaris, yaitu di Direktorat Data dan Informasi Perpajakan (Direktorat DIP), Subdirektorat Tata Kelola data dan Informasi (Subdit TKDI), dan seksi Perencanaan Strategis Data dan Informasi (Seksi PSDI). Buat ringkasan eksekutif "
-        "yang detail dari teks transkrip rapat di bawah dengan format:\n"
-        "1. Topik Utama Pembahasan\n"
-        "2. Poin-Poin Penting Diskusi, utamakan yang terkait tengan DIP, TKDI, PSDI\n"
-        "3. Action Items (Siapa melakukan apa), utamakan yang terkait tengan DIP, TKDI, PSDI\n"
-        "4. Kesimpulan Akhir Rapat.\n\n"
-        "Gunakan Bahasa Indonesia formal yang lazim digunakan di instansi pemerintah."
+        "Bertindaklah secara simultan sebagai 3 (tiga) peran Sekretaris di lingkungan Direktorat Jenderal Pajak (DJP), yaitu:\n"
+        "1. Sekretaris Direktorat Data dan Informasi Perpajakan (Direktorat DIP) - Fokus pada kebijakan makro dan implikasi organisasi.\n"
+        "2. Sekretaris Subdirektorat Tata Kelola Data dan Informasi (Subdit TKDI) - Fokus pada aspek manajemen data, standar kepatuhan, dan regulasi.\n"
+        "3. Sekretaris Seksi Perencanaan Strategis Data dan Informasi (Seksi PSDI) - Fokus pada detail teknis eksekusi, timeline, dan operasional.\n\n"
+        "Sintesiskan teks transkrip rapat menjadi sebuah Ringkasan Eksekutif yang detail, bernada profesional, serta menggunakan Bahasa Indonesia formal kedinasan yang lazim digunakan dalam Nota Dinas/Laporan Resmi DJP. Fokus pada kejelasan, ringkas, dan relevansi strategis.\n\n"
+        "Susun laporan dengan format baku sebagai berikut:\n"
+        "1. TOPIK UTAMA PEMBAHASAN (Urgensi dan latar belakang rapat)\n"
+        "2. POIN-POIN PENTING DISKUSI (Isu strategis tata kelola vs kendala teknis lapangan)\n"
+        "3. MATRIKS TINDAK LANJUT (ACTION ITEMS) (Siapa melakukan apa dan target waktunya)\n"
+        "4. KESIMPULAN AKHIR RAPAT DAN REKOMENDASI STRATEGIS (Bahan pengambilan keputusan pimpinan)\n\n"
+        "Catatan: Batasi ringkasan hanya berdasarkan fakta di transkrip. Jika data kurang, sebutkan sebagai 'Knowledge Gap/Catatan Hambatan' di akhir."
     )
     
-    ai_prompt = st.text_area("Instruksi Perintah AI (Prompt):", value=default_prompt, height=120)
+    # Menampilkan prompt di Text Area agar tetap bisa diedit manual jika perlu
+    ai_prompt = st.text_area("Instruksi Perintah AI (Prompt):", value=default_prompt, height=280)
     
     if st.button("Generate Notulensi Rapat", use_container_width=True):
         if not st.session_state.transcript_result.strip():
             st.error("Gagal: Lakukan transkrip teks/isi teks mentah terlebih dahulu!")
         else:
-            with st.spinner("Ollama sedang menganalisis transkrip..."):
+            with st.spinner("Ollama sedang menganalisis transkrip sesuai format DJP..."):
                 st.session_state.ai_analysis = query_qwen(st.session_state.transcript_result, ai_prompt)
-            st.toast("Notulensi berhasil dibuat!", icon="✨")
+            st.toast("Notulensi Khas DJP berhasil dibuat!", icon="✨")
             
     st.markdown("<br>", unsafe_allow_html=True)
     
