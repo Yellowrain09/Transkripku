@@ -1,0 +1,48 @@
+Install Qwen 2.5 3B Lewat VS Code
+
+### 1. Persiapan Lingkungan Kerja (Setup Environment)
+
+Langkah awal adalah menyiapkan fondasi folder dan lingkungan Python yang terisolasi (*Virtual Environment*) agar tidak bentrok dengan library lain.
+
+* Membuat folder utama bernama `Transkripku`.
+* Membuka folder tersebut di VS Code.
+* Membuat dan mengaktifkan *virtual environment* via terminal:
+```bash
+python -m venv venv
+# Aktivasi di Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+
+```
+* Menginstal semua pustaka yang diperlukan melalui `pip install` (Streamlit, Faster-Whisper, SoundDevice, SciPy, Python-Docx, Pyttsx3, gTTS, dan NumPy).
+---
+
+### 2. Konfigurasi Jalur Audio Virtual (Windows Setup)
+Agar Python bisa menangkap suara yang keluar dari aplikasi MS Teams (bukan dari mikrofon fisik Anda), kita memasang jembatan audio virtual.
+* Mengunduh dan menginstal **VB-AUDIO Virtual Cable**.
+* Mengubah pengaturan **Speaker** di dalam aplikasi MS Teams menjadi **CABLE Input (VB-Audio Virtual Cable)**.
+* Mengaktifkan fitur **"Listen to this device"** pada **CABLE Output** di pengaturan Sound klasiknya Windows (`mmsys.cpl`) dan mengarahkannya ke headset Anda. Langkah ini krusial agar Anda tetap bisa mendengarkan jalannya rapat sambil membiarkan Python merekam di latar belakang.
+---
+### 3. Pengembangan Backend Aplikasi (`app.py`)
+File `app.py` bertindak sebagai otak mekanis aplikasi. Di dalamnya terdapat fungsi-fungsi inti:
+
+* **Perekaman Fleksibel (`start_live_recording` & `stop_live_recording`):** Menggunakan pustaka `sounddevice` untuk membuka *stream* audio Windows dari perangkat VB-Cable. Sistem diubah dari durasi statis (menit) menjadi dinamis menggunakan tombol start/stop dengan memori *buffer* agar sangat stabil dan anti-crash.
+* **Transkrip Offline (`transcribe_audio`):** Memuat model AI **Faster-Whisper (Medium)** dari folder lokal secara 100% offline untuk mengubah audio `.wav` hasil rapat menjadi teks mentah.
+* **Analisis AI (`query_qwen`):** Mengirimkan teks transkrip mentah ke model LLM **Qwen 2.5** melalui **Ollama** lokal untuk dibuatkan notulensi resmi.
+* **Ekspor Word Dokumentasi (`export_to_docx`):** Menggunakan `python-docx` untuk menyalin hasil ringkasan AI ke dalam file Word dengan sistem penamaan otomatis yang aman dari error (`summary1.docx`, `summary2.docx`, dst.).
+---
+### 4. Pembuatan Antarmuka UI Modern (`ui.py`)
+File `ui.py` bertindak sebagai wajah aplikasi berbasis web Streamlit.
+* Mengatur tema visual gelap (*Dark Mode*) minimalis yang nyaman di mata dengan dominasi warna hitam dan teks putih menyala kontras tinggi.
+* Menyediakan dua mode input fleksibel: **Live Recording (MS Teams)** dengan tombol Start/Stop otomatis, dan **Upload File Audio** untuk berkas rekaman lama.
+* Menampilkan kolom teks editor hasil transkrip mentah, kolom instruksi AI (*Prompt Customization*), kotak visual hasil ringkasan resmi, serta tombol unduh (*download button*) dokumen Word yang dinamis.
+---
+### 🏃‍♂️ Cara Menjalankan Aplikasi Setiap Hari
+Jika Anda ingin mulai bekerja dan menggunakan aplikasi ini kembali, urutan kliknya sangat mudah:
+1. Buka VS Code pada folder `Transkripku`.
+2. Pastikan virtual environment aktif (ada tanda `(venv)` di depan baris terminal).
+3. Pastikan aplikasi **Ollama** di laptop Anda sudah menyala di latar belakang.
+4. Jalankan perintah ini di terminal:
+```bash
+streamlit run ui.py
+```
+5. Browser akan otomatis terbuka dan sistem **Transkripku** siap mendokumentasikan rapat Anda dengan aman!
